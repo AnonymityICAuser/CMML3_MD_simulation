@@ -1,34 +1,44 @@
 # CMML3 Molecular Dynamics Simulation Repository
 
 ## Overview
-This repository contains a complete workflow for molecular dynamics (MD) simulations of CMML3 systems, including analysis tools and visualization pipelines. The tools are optimized for GROMACS output files but can be adapted for other MD packages.
+This repository contains a complete workflow for molecular dynamics (MD) simulations of CMML3 systems, including analysis steps and visualization pipelines. The tools are optimized for GROMACS output files but can be adapted for other MD packages.
 
 
 ## Workflow Documentation
 
-### 1. Simulation Setup
-- Use GROMACS (or preferred MD package) with these recommended parameters:
-  ```bash
-  # Energy minimization
-  emtol = 1000.0  # kJ/mol/nm
-  emstep = 0.01   # nm
+### 1. GROMACS MD Simulation 
+Please check the ./MD_sim_GROMACS/md_sim.bash and relevant setting files .mdp. 
 
-  # Equilibration
-  nsteps = 50000   # 100ps
-  dt = 0.002       # ps
-  ```
+Here presents the meaning of each type of mdp file:
+- em.mdp: Energy minimization parameter file. Used to relax the initial structure and remove steric clashes before running dynamics.
+- ions.mdp: Parameter file for ion placement. Used when adding ions to neutralize the system or achieve a specific ionic concentration.
+- NVT_mdps folder: Contains parameter files for NVT ensemble simulations (constant Number of particles, Volume, and Temperature) at different temperatures. NVT equilibration is typically the first equilibration phase after energy minimization.
+- NPT_mdps folder: Contains parameter files for NPT ensemble simulations (constant Number of particles, Pressure, and Temperature) at different temperatures. NPT equilibration typically follows NVT equilibration to allow the system volume to adjust.
+- Production MD files:
+	1. md_50ns_280K.mdp: 50 nanosecond production run at 280K
+	2. md_50ns_300K.mdp: 50 nanosecond production run at 300K
+	3. md_50ns_320K.mdp: 50 nanosecond production run at 320K
+These are for the actual data collection simulations after equilibration.
+
+Run the bash script directly when you are ready for simulation:
+```bash 
+bash ./MD_sim_GROMACS/md_sim.bash
+```
+
 
 ### 2. GROMACS Analysis
+Please check the ./MD_sim_GROMACS/analysis.bash. After the first simulation step, you could run the analysis directly, but please setting the correct working and output direcotries:
+
+```bash
+bash ./MD_sim_GROMACS/analysis.bash.
+```
+
+The result will be collected in folder `result_analysis/chains` for each chain and 'result_analysis/complex for the whole complex.
 
 
-### 3. Analysis Pipeline
-1. Run `analysis_results.py` for comprehensive statistics
-2. Generate specific comparisons with `Different_temps.py`
-3. Create publication figures with `plot_xvg.py`
+### 3. Visualization Pipeline
 
-
-
-## Details in Analysis_visualization section
+The visualization is based on Python.
 
 - Dependencies:
 ```text
@@ -40,7 +50,7 @@ seaborn >= 0.11
 scipy >= 1.6
 ```
 
-#### 1. Different_temps.py
+##### 1. Different_temps.py
 **Purpose**: Comparative analysis of simulation trajectories across multiple temperatures.
 
 **Key Features**:
@@ -82,8 +92,7 @@ time_dirs = ['50ns']  # Can extend to ['10ns', '50ns', '100ns']
 **Advanced Features**:
 - Robust error handling for malformed XVG files
 - Automatic label extraction from XVG metadata
-- Support for multi-column XVG files (e.g., per-residue RMSF)
-- Configurable equilibration point detection (default: 50% of trajectory)
+- Support for multi-column XVG files 
 
 **Usage**:
 ```bash
@@ -97,7 +106,7 @@ python analysis_results.py -i ./chains -o ./analysis_output -t 300K
 python analysis_results.py -i ./chains -o ./analysis_output -s 50ns
 ```
 
-#### 3. plot_xvg.py
+##### 3. plot_xvg.py
 **Purpose**: Quick visualization of individual XVG files with publication-quality output.
 
 **Features**:
@@ -115,50 +124,18 @@ python plot_xvg.py -i ./raw_data -o ./plots
 python plot_xvg.py -i ./raw_data -o ./plots -p "*rmsd*.xvg"
 ```
 
-### chains/
-**Directory Structure Convention**:
-```
-chains/
-└── [ChainID]/               # e.g., ChainH, ChainD
-    └── [Temperature]/       # e.g., 280K, 300K, 320K
-        ├── [Timepoint]/     # e.g., 10ns, 50ns
-        │   ├── rmsd.xvg
-        │   ├── gyrate.xvg
-        │   └── ...
-        ├── temperature.xvg
-        ├── pressure.xvg
-        └── density.xvg
-```
-
 **Expected Analysis Files**:
 1. Structural:
    - `rmsd.xvg`: Backbone RMSD
    - `rmsd_xtal.xvg`: Crystal reference RMSD
-   - `rmsf.xvg`: Per-residue fluctuations
    - `gyrate.xvg`: Radius of gyration
 
 2. Interactions:
    - `hb_all.xvg`: All hydrogen bonds
    - `hb_bb.xvg`: Backbone hydrogen bonds
 
-3. Dynamics:
-   - `eigenval.xvg`: PCA eigenvalues
-   - `ev_components.xvg`: Eigenvector components
-   - `ev_rmsf.xvg`: Eigenvector RMSF
 
-### pyRMMA/
-(For complete documentation, see [pyRMMA enhanced](https://github.com/yourusername/pyRMMA))
-
-**Key Parameters**:
-```python
-# Typical configuration
-parameters = {
-    'correlation_times': [1e-9, 1e-8, 1e-7],  # Time scales for analysis
-    'spectral_density': 'model-free',          # Options: 'model-free', 'lorentzian'
-    'cutoff_frequency': 50.0,                  # MHz
-    'relaxation_matrix': 'redfield'            # Matrix calculation method
-}
-```
-
+#####./pyRMMA
+Python package for Ramachandran plot generation of protein structure, forked from https://github.com/gerdos/PyRAMA and has been modified. Please check details in https://github.com/AnonymityICAuser/PyRAMA_enhanced.
 
 
