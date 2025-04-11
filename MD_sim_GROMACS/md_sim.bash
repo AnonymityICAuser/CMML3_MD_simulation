@@ -13,9 +13,9 @@ NVT_BASE=$INPUT_DIR/required_files/NVT.mdp
 NPT_BASE=$INPUT_DIR/required_files/NPT.mdp
 NVT_DIR=$INPUT_DIR/required_files/NVTs
 NPT_DIR=$INPUT_DIR/required_files/NPTs
-MD_1NS=$INPUT_DIR/required_files/md_1ns.mdp
-MD_10NS=$INPUT_DIR/required_files/md_10ns.mdp
-MD_50NS=$INPUT_DIR/required_files/md_50ns.mdp
+MD_1NS=$INPUT_DIR/required_files/md_1ns/
+MD_10NS=$INPUT_DIR/required_files/md_10/
+MD_50NS=$INPUT_DIR/required_files/md_50/
 
 # Temperature and replicate settings
 TEMPERATURES=(300 320 280)
@@ -95,7 +95,7 @@ for rep in $(seq 1 $REPLICATES); do
         
         # Production MD runs at different time scales
         # 1ns run
-        gmx grompp -f $MD_1NS -c ${REP_DIR}/8_npt/${temp}K/npt.gro -t ${REP_DIR}/8_npt/${temp}K/npt.cpt -p topol.top -o ${REP_DIR}/9_md/${temp}K/1ns/md_1ns.tpr -maxwarn 2
+        gmx grompp -f ${MD_1NS}/md_1ns_${temp}.mdp -c ${REP_DIR}/8_npt/${temp}K/npt.gro -t ${REP_DIR}/8_npt/${temp}K/npt.cpt -p topol.top -o ${REP_DIR}/9_md/${temp}K/1ns/md_1ns.tpr -maxwarn 2
         
         gmx mdrun -v -deffnm ${REP_DIR}/9_md/${temp}K/1ns/md_1ns -nb gpu -ntomp 8 -pin on -pinoffset 0
         
@@ -106,7 +106,7 @@ for rep in $(seq 1 $REPLICATES); do
         echo "1 0" | gmx trjconv -s ${REP_DIR}/9_md/${temp}K/1ns/md_1ns.tpr -f ${REP_DIR}/9_md/${temp}K/1ns/md_1ns.xtc -o ${REP_DIR}/9_md/${temp}K/1ns/md_1ns_noPBC.xtc -pbc mol -center
 
         # 10ns run (only if needed - can comment out to save time initially)
-        gmx grompp -f $MD_10NS -c ${REP_DIR}/9_md/${temp}K/1ns/md_1ns.gro -t ${REP_DIR}/9_md/${temp}K/1ns/md_1ns.cpt -p topol.top -o ${REP_DIR}/9_md/${temp}K/10ns/md_10ns.tpr -maxwarn 2
+        gmx grompp -f ${MD_10NS}/md_10ns_${temp}.mdp -c ${REP_DIR}/9_md/${temp}K/1ns/md_1ns.gro -t ${REP_DIR}/9_md/${temp}K/1ns/md_1ns.cpt -p topol.top -o ${REP_DIR}/9_md/${temp}K/10ns/md_10ns.tpr -maxwarn 2
         
         gmx mdrun -v -deffnm ${REP_DIR}/9_md/${temp}K/10ns/md_10ns -nb gpu -ntomp 10 -pin on -pinoffset 0
         
@@ -117,7 +117,7 @@ for rep in $(seq 1 $REPLICATES); do
         echo "1 0" | gmx trjconv -s ${REP_DIR}/9_md/${temp}K/10ns/md_10ns.tpr -f ${REP_DIR}/9_md/${temp}K/10ns/md_10ns.xtc -o ${REP_DIR}/9_md/${temp}K/10ns/md_10ns_noPBC.xtc -pbc mol -center
         
         # 50ns run (only if needed - can comment out to save time initially)
-        gmx grompp -f $MD_50NS -c ${REP_DIR}/9_md/${temp}K/10ns/md_10ns.gro -t ${REP_DIR}/9_md/${temp}K/10ns/md_10ns.cpt -p topol.top -o ${REP_DIR}/9_md/${temp}K/50ns/md_50ns.tpr -maxwarn 2
+        gmx grompp -f ${MD_50NS}/md_50ns_${temp}.mdp -c ${REP_DIR}/9_md/${temp}K/10ns/md_10ns.gro -t ${REP_DIR}/9_md/${temp}K/10ns/md_10ns.cpt -p topol.top -o ${REP_DIR}/9_md/${temp}K/50ns/md_50ns.tpr -maxwarn 2
         
         gmx mdrun -v -deffnm ${REP_DIR}/9_md/${temp}K/50ns/md_50ns -nb gpu -ntomp 10 -pin on -pinoffset 0
         
