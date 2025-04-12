@@ -21,7 +21,7 @@ These are for the actual data collection simulations after equilibration.
 
 Run the bash script directly when you are ready for simulation:
 ```bash 
-bash ./MD_sim_GROMACS/md_sim.bash
+bash ./MD_sim_GROMACS/md_sim.bash INPUT_DIR OUTPUT_DIR
 ```
 The final results in current work could be obtained from https://github.com/AnonymityICAuser/CMML3_additional_data. 
 
