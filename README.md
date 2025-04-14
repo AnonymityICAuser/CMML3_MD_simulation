@@ -1,5 +1,17 @@
 # CMML3 Molecular Dynamics Simulation: Scripts
 
+## Information about my complex
+
+| PDB ID | 2WWX |
+|---------|-------|
+| **Structure** | SidM/DrrA(GEF/GDF domain)-Rab1(GTPase) complex |
+| **Resolution** | 1.50 Å |
+| **Method** | X-RAY DIFFRACTION |
+| **Organisms** | H. sapiens (Rab1), L. pneumophila (SidM/DrrA) |
+| **Function** | Bacterial effector protein that hijacks host vesicular trafficking by acting as both a guanine nucleotide exchange factor (GEF) and GDI displacement factor (GDF) for Rab1 |
+| **Significance** | Reveals mechanism by which L. pneumophila manipulates host membrane transport during infection |
+| **Published** | EMBO J (2010) 29: 496, https://doi.org/10.1038/emboj.2009.347
+
 ## Overview
 This repository contains a complete workflow for molecular dynamics (MD) simulations of CMML3 systems, including MD simulation step, analysis steps, and visualization pipelines. 
 
@@ -24,6 +36,8 @@ Run the bash script directly when you are ready for simulation:
 bash ./MD_sim_GROMACS/md_sim.bash INPUT_DIR OUTPUT_DIR
 ```
 The final results in current work could be obtained from https://github.com/AnonymityICAuser/CMML3_additional_data. 
+
+If you want to know more about the details, like actual parameters and setting in the code, please check the last section "Details in GROMACS simulation". 
 
 ### 2. GROMACS Analysis
 
@@ -151,4 +165,80 @@ python analysis_results.py -i ./chains -o ./analysis_output -s 50ns
 ##### ./pyRMMA
 Python package for Ramachandran plot generation of protein structure, forked from https://github.com/gerdos/PyRAMA and has been modified. Please check details in https://github.com/AnonymityICAuser/PyRAMA_enhanced.
 
+## Additional information: Details in GROMACS simulation 
 
+### Structure Preparation
+```bash
+gmx pdb2gmx -f input.pdb -o complex_processed.gro -water spce -ignh -missing
+```
+Converts PDB to GROMACS format with SPCE water model.
+
+### Box Definition
+```bash
+gmx editconf -f complex_processed.gro -o complex_box.gro -c -d 1.0 -bt cubic
+```
+Creates cubic simulation box with 1.0 nm protein-to-edge distance.
+
+### Solvation
+```bash
+gmx solvate -cp complex_box.gro -cs spc216.gro -o complex_solv.gro -p topol.top
+```
+Fills box with water molecules.
+
+### Ion Addition Setup
+```bash
+gmx grompp -f ions.mdp -c complex_solv.gro -p topol.top -o ions.tpr -maxwarn 2
+```
+Prepares system for ion addition.
+
+### Neutralization
+```bash
+gmx genion -s ions.tpr -o complex_ions.gro -p topol.top -neutral
+```
+Adds ions to neutralize system charge.
+
+### Energy Minimization
+```bash
+gmx grompp -f em.mdp -c complex_ions.gro -p topol.top -o em.tpr -maxwarn 2
+gmx mdrun -v -deffnm em -nb gpu -ntomp 8 -pin on
+```
+Removes unfavorable contacts and relaxes system.
+
+### NVT Equilibration
+```bash
+gmx grompp -f NVT.mdp -c em.gro -r em.gro -p topol.top -o nvt.tpr -maxwarn 2
+gmx mdrun -v -deffnm nvt -nb gpu -ntomp 8 -pin on
+```
+Constant Number, Volume, Temperature equilibration (200ps).
+
+### NPT Equilibration
+```bash
+gmx grompp -f NPT.mdp -c nvt.gro -r nvt.gro -t nvt.cpt -p topol.top -o npt.tpr -maxwarn 2
+gmx mdrun -v -deffnm npt -nb gpu -ntomp 8 -pin on
+```
+Constant Number, Pressure, Temperature equilibration (500ps).
+
+### Production MD (1ns example)
+```bash
+gmx grompp -f md_1ns.mdp -c npt.gro -t npt.cpt -p topol.top -o md_1ns.tpr -maxwarn 2
+gmx mdrun -v -deffnm md_1ns -nb gpu -ntomp 8 -pin on
+```
+Production simulation run.
+
+### Trajectory Processing
+```bash
+gmx trjconv -s md_1ns.tpr -f md_1ns.xtc -o md_1ns_noPBC.xtc -pbc mol -center
+```
+Removes PBC effects and centers protein for analysis.
+
+## Temperature Variants
+
+The pipeline runs parallel simulations at multiple temperatures (280K, 300K, 320K) by using temperature-specific parameter files for each stage.
+
+## Simulation Extensions
+
+The pipeline supports extending simulations to longer timescales (10ns, 50ns) by continuing from previous simulation endpoints:
+```bash
+gmx grompp -f md_10ns.mdp -c md_1ns.gro -t md_1ns.cpt -p topol.top -o md_10ns.tpr
+gmx mdrun -v -deffnm md_10ns -nb gpu -ntomp 10 -pin on
+```
