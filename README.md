@@ -19,6 +19,12 @@ This repository contains a complete workflow for molecular dynamics (MD) simulat
 
 ## Workflow Documentation
 
+Please clone the repository if you also want to do similar work or reproduce my current work:
+
+```bash
+git clone https://github.com/AnonymityICAuser/CMML3_MD_simulation
+```
+
 ### 1. GROMACS MD Simulation 
 Please check the ./MD_sim_GROMACS/md_sim.bash and relevant setting files .mdp. 
 
@@ -30,9 +36,13 @@ Here presents the meaning of each type of mdp file:
 - NVT_mdps folder: Contains parameter files for NVT ensemble simulations (constant Number of particles, Volume, and Temperature) at different temperatures. NVT equilibration is typically the first equilibration phase after energy minimization.
 - NPT_mdps folder: Contains parameter files for NPT ensemble simulations (constant Number of particles, Pressure, and Temperature) at different temperatures. NPT equilibration typically follows NVT equilibration to allow the system volume to adjust.
 - Production MD files:
+
         1. md_50ns_280K.mdp: 50 nanosecond production run at 280K
+        
         2. md_50ns_300K.mdp: 50 nanosecond production run at 300K
+        
         3. md_50ns_320K.mdp: 50 nanosecond production run at 320K
+        
 These are for the actual data collection simulations after equilibration.
 
 Run the bash script directly when you are ready for simulation:
@@ -74,7 +84,7 @@ seaborn >= 0.11
 scipy >= 1.6
 ```
 
-##### 1. plot_xvg.py
+#### I. plot_xvg.py
 **Purpose**: Quick visualization of individual XVG files with publication-quality output.
 
 **Features**:
@@ -102,7 +112,7 @@ python plot_xvg.py -i ./raw_data -o ./plots -p "*rmsd*.xvg"
    - `hb_all.xvg`: All hydrogen bonds
    - `hb_bb.xvg`: Backbone hydrogen bonds
 
-##### 2. Different_temps.py
+#### II. Different_temps.py
 **Purpose**: Comparative analysis of simulation trajectories across multiple temperatures.
 
 **Key Features**:
@@ -132,7 +142,7 @@ python Different_temps.py
 ```
 
 
-#### 3. analysis_results.py (optional)
+#### III. analysis_results.py (optional)
 **Purpose**: Comprehensive statistical comparative analysis and visualization of MD trajectories. The results didn't presented in final report.
 
 **Analysis Capabilities**:
@@ -166,7 +176,7 @@ python analysis_results.py -i ./chains -o ./analysis_output -s 50ns
 
 
 
-##### ./pyRMMA
+#### ./pyRMMA: open-source package
 Python package for Ramachandran plot generation of protein structure, forked from https://github.com/gerdos/PyRAMA and has been modified. Please check details in https://github.com/AnonymityICAuser/PyRAMA_enhanced.
 
 ## Additional information: Details in GROMACS simulation 
