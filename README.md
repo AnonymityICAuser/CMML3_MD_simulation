@@ -15,10 +15,14 @@
 ## Overview
 This repository contains a complete workflow for molecular dynamics (MD) simulations of CMML3 systems, including MD simulation step, analysis steps, and visualization pipelines. 
 
+![overall.png](overall.png)
+
 ## Workflow Documentation
 
 ### 1. GROMACS MD Simulation 
 Please check the ./MD_sim_GROMACS/md_sim.bash and relevant setting files .mdp. 
+
+![gromacs.png](gromacs.png)
 
 Here presents the meaning of each type of mdp file:
 - em.mdp: Energy minimization parameter file. Used to relax the initial structure and remove steric clashes before running dynamics.
@@ -26,9 +30,9 @@ Here presents the meaning of each type of mdp file:
 - NVT_mdps folder: Contains parameter files for NVT ensemble simulations (constant Number of particles, Volume, and Temperature) at different temperatures. NVT equilibration is typically the first equilibration phase after energy minimization.
 - NPT_mdps folder: Contains parameter files for NPT ensemble simulations (constant Number of particles, Pressure, and Temperature) at different temperatures. NPT equilibration typically follows NVT equilibration to allow the system volume to adjust.
 - Production MD files:
-	1. md_50ns_280K.mdp: 50 nanosecond production run at 280K
-	2. md_50ns_300K.mdp: 50 nanosecond production run at 300K
-	3. md_50ns_320K.mdp: 50 nanosecond production run at 320K
+        1. md_50ns_280K.mdp: 50 nanosecond production run at 280K
+        2. md_50ns_300K.mdp: 50 nanosecond production run at 300K
+        3. md_50ns_320K.mdp: 50 nanosecond production run at 320K
 These are for the actual data collection simulations after equilibration.
 
 Run the bash script directly when you are ready for simulation:
